@@ -12,7 +12,7 @@ Only the first sheet is used.
 
 First row is ignored as a header.
 
-Insert the following columns and make them look good: Description, Calendar, Google Doc, Table #, From, To, Start time, End Time, Table Content, Time Zone
+Insert the following columns and make them look good: Description, Calendar, Google Doc, Table #, From, To, Start time, End Time, Table Content, Time Zone, Auto
 
 ## Fill in the information
 
@@ -69,6 +69,10 @@ Time Zone code use.
 
 Default: CET
 
+### Auto
+
+If set to "yes" or "true" a trigger will be created that runs the sync on changes in the calender.
+
 ## Add App Script
 
 Press the "Add on" meny and then "Apps Script".
@@ -83,7 +87,3 @@ Add Calendar and DocumentApp service to the Apps Script.
 # Run sync
 
 Do the sync...
-
-# Add trigger
-
-It is possible to add a trigger on the Apps Script to run the sync on changes of an calendar.

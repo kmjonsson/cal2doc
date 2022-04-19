@@ -1,16 +1,69 @@
-// Sync method. Called from App scripts or from calendar event
 function sync(e) {
   let syncData = getSyncData();
+  // Sync calenders
   for(let data of syncData) {
-    if(e && e['calendarId'] && e.calendarId != data.calendarId) {
-      continue;
+    if(e && e['calendarId'] && e.calendarId == data.calendarId) {
+      let rows = getEvents(data);
+      updateTable(data,rows);
     }
-    let rows = getEvents(data);
-    updateTable(data,rows);
+  }
+  // Don't update triggers on trigger runs
+  if(!e) {
+    updateTriggers(syncData);
   }
 }
 
-// Fetch data from Google Sheet
+function updateTriggers(data) {
+  let allTriggers = ScriptApp.getProjectTriggers();
+
+  // Add
+  for(let d of data) {
+    if(!d.auto) {
+      continue;
+    }
+    let found = false;
+    for (let trigger of allTriggers) {
+      if(trigger.getTriggerSourceId() == d.calendarId) {
+        found = true;
+        break;
+      }
+    }
+    if(!found) {
+      Logger.log("Add trigger for: %s", d.calendarId);
+      ScriptApp.newTrigger('sync')
+        .forUserCalendar(d.calendarId)
+        .onEventUpdated()
+        .create();
+    }
+  }
+
+  // Remove unused..
+  for (let trigger of allTriggers) {
+    //Logger.log(trigger.getEventType());
+    //Logger.log(trigger.getTriggerSource());
+    if(trigger.getEventType() != "ON_EVENT_UPDATED") {
+      continue;
+    }
+    if(trigger.getTriggerSource() != "CALENDAR") {
+      continue;
+    }
+    let found = false;
+    for(let d of data) {
+      if(trigger.getTriggerSourceId() == d.calendarId) {
+        found = true;
+        break;
+      }
+    }
+    //Logger.log(trigger.getTriggerSourceId());
+    if(found) {
+      continue;
+    }
+    Logger.log("Remove trigger for: %s",trigger.getTriggerSourceId());
+    ScriptApp.deleteTrigger(trigger);
+  }
+
+}
+
 function getSyncData() {
   let ss = SpreadsheetApp.getActive();
   let sheets = ss.getSheets();
@@ -20,24 +73,27 @@ function getSyncData() {
   var rows = sheet.getDataRange().getValues();
   rows.shift();
   for(let row of rows) {
-    syncData.push({
-      "description": row[0],     // Just for debug, not used.
-      "calendarId": row[1],      // calenderId
-      "documentId": row[2],      // documentId
-      "table": parseInt(row[3]), // Table number in document starting @ 0
-      "fromDate": row[4],        // Start Date to extract from calendar
-      "toDate": row[5],          // End Date to extract from calendar
-      "start_time": row[6],      // Default start time of event
-      "end_time": row[7],        // Default end time of event
-      "table_content": row[8],   // What to insert into calendar
-      'timeZone': (row[9] && row[9] != "") ? row[9] : "CET",
-    })
+    if(row[0]) {
+      syncData.push({
+        "description": row[0],     // Just for debug, not used.
+        "calendarId": row[1],      // calenderId
+        "documentId": row[2],      // documentId
+        "table": parseInt(row[3]), // Table number in document starting @ 0
+        "fromDate": row[4],        // Start Date to extract from calendar
+        "toDate": row[5],          // End Date to extract from calendar
+        "start_time": row[6],      // Default start time of event
+        "end_time": row[7],        // Default end time of event
+        "table_content": row[8],   // What to insert into calendar
+        'timeZone': (row[9] && row[9] != "") ? row[9] : "CET",
+        'auto': row[10] && (row[10] in ['yes','true','YES','ja']),
+      })
+    }
   }
   return syncData;
 }
 
-// Update table in document
 function updateTable(data,rows) {
+  //Logger.log(data);
   var body = DocumentApp.openById(data.documentId).getBody();
   var tables = body.getTables()
   var table = tables[data.table]
@@ -79,7 +135,7 @@ function updateTable(data,rows) {
       if(key in row) {
         t.getCell(i).setText(row[key]);
       } else {
-        Logger.log("Failed to update cell: %d on row: %d, no key: %s", i, n, key);
+        Logger.log("Can't update cell: %d on row: %d, no key: %s", i, n, key);
       }
     }
     rp++;
@@ -146,4 +202,3 @@ function getEvents(data) {
   }
   return rows;
 }
-
