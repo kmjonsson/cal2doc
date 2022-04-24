@@ -138,7 +138,10 @@ function updateTable(data,rows) {
         continue;
       }
       if(key in row) {
-        t.getCell(i).setText(row[key]);
+        let ctext = t.getCell(i).getText();
+        if(ctext != row[key]) {
+          t.getCell(i).setText(row[key]);
+        }
       } else {
         Logger.log("Can't update cell: %d on row: %d, no key: %s", i, n, key);
       }
