@@ -85,7 +85,7 @@ function getSyncData() {
         "end_time": row[7],        // Default end time of event
         "table_content": row[8],   // What to insert into calendar
         'timeZone': (row[9] && row[9] != "") ? row[9] : "CET",
-        'auto': row[10] && (row[10] in ['yes','true','YES','ja']),
+        'auto': ['yes','true','YES','ja'].includes(row[10]) ? true : false,
       })
     }
   }
