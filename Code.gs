@@ -34,6 +34,8 @@ function updateTriggers(data) {
         .forUserCalendar(d.calendarId)
         .onEventUpdated()
         .create();
+      // Update
+      allTriggers = ScriptApp.getProjectTriggers();
     }
   }
 
