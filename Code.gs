@@ -51,6 +51,9 @@ function updateTriggers(data) {
     }
     let found = false;
     for(let d of data) {
+      if(!d.auto) {
+        continue;
+      }
       if(trigger.getTriggerSourceId() == d.calendarId) {
         found = true;
         break;
