@@ -55,8 +55,10 @@ A "," separated lite of content from the event to insert into the table.
 Available data:
 
 - dateStr
+- dateISOStr (ISO format date)
 - title
 - location (First part until ",")
+- longLocation
 - description
 - empty ("")
 - skip (Do not edit)
