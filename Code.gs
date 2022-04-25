@@ -32,6 +32,13 @@ function sync(e) {
   }
 }
 
+function onOpen() {
+  let ui = SpreadsheetApp.getUi(); // Or DocumentApp or SlidesApp or FormApp.
+  let menu = ui.createMenu('Cal2Doc');
+  menu.addItem('Sync', 'sync');
+  menu.addToUi();
+}
+
 function updateTriggers(data) {
   let allTriggers = ScriptApp.getProjectTriggers();
 
