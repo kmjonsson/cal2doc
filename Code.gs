@@ -191,14 +191,25 @@ function getEvents(data) {
       // Convert to "D/M"-format.
       let start_date = start.toLocaleDateString("sv-SE", {timeZone}).replace(/(\d+)-0?(\d+)-0?(\d+)/, '$3/$2');
       let end_date = end.toLocaleDateString("sv-SE", {timeZone}).replace(/(\d+)-0?(\d+)-0?(\d+)/, '$3/$2');
-      let output = start_date;
+      let dateStr = start_date;
       if(start_date != end_date) { // add end_date if start_date != end_date
-        output = start_date + " " + start_time + " - " + end_date + " " + end_time;
+        dateStr = start_date + " " + start_time + " - " + end_date + " " + end_time;
       } else if(start_time != "") {
-        output = start_date + " " + start_time + " - " + end_time;  
+        dateStr = start_date + " " + start_time + " - " + end_time;
       }
+      // Convert to ISO-format
+      let iso_start_date = start.toLocaleDateString("sv-SE", {timeZone});
+      let iso_end_date = end.toLocaleDateString("sv-SE", {timeZone});
+      let dateISOStr = iso_start_date;
+      if(iso_start_date != iso_end_date) { // add iso_end_date if iso_start_date != iso_end_date
+        dateISOStr = iso_start_date + " " + start_time + " - " + iso_end_date + " " + end_time;
+      } else if(start_time != "") {
+        dateISOStr = iso_start_date + " " + start_time + " - " + end_time;
+      }
+
       rows.push({
-        'dateStr': output,
+        'dateStr': dateStr.replace("  "," "),
+        'dateISOStr': dateISOStr.replace("  "," "),
         'title': event.summary,
         'location': (event.location ? event.location : "").split(",")[0],
         'description': event.description ? event.description : "",
