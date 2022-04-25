@@ -169,7 +169,7 @@ function getEvents(data) {
       let end;
       let end_time = "";
 
-      let timeZone = 'CET';
+      let timeZone = data.timeZone;
 
       if (event.start.date) {
         // All-day event.
