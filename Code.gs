@@ -2,7 +2,7 @@ function sync(e) {
   let syncData = getSyncData();
   // Sync calenders
   for(let data of syncData) {
-    if(e && e['calendarId'] && e.calendarId == data.calendarId) {
+    if(!e || e['calendarId'] && e.calendarId == data.calendarId) {
       let rows = getEvents(data);
       updateTable(data,rows);
     }
