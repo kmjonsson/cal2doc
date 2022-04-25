@@ -212,6 +212,7 @@ function getEvents(data) {
         'dateISOStr': dateISOStr.replace("  "," "),
         'title': event.summary,
         'location': (event.location ? event.location : "").split(",")[0],
+        'longLocation': event.location,
         'description': event.description ? event.description : "",
         'empty': "",
       });
