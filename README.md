@@ -24,6 +24,8 @@ This is just a comment to easy know what the sync is for, it is never used.
 
 This is tha calendar "ID" found in the calendar settings. It has the form of an email adress.
 
+Mutiple calnders can be used separated with a ",".
+
 ### Google Doc
 
 This is the "ID" of the document found in the URI of an open document.
