@@ -21,7 +21,7 @@ function sync(e) {
   let syncData = getSyncData();
   // Sync calenders
   for(let data of syncData) {
-    if(!e || e['calendarId'] && e.calendarId == data.calendarId) {
+    if(!e || e['calendarId'] && e.calendarId in data.calendarId) {
       let rows = getEvents(data);
       updateTable(data,rows);
     }
@@ -41,23 +41,29 @@ function onOpen() {
 
 function updateTriggers(data) {
   let allTriggers = ScriptApp.getProjectTriggers();
+  let allCalenders = new Set()
+
+  for(let d of data) {
+    if(d.auto) {
+      for(let c of d.calendarId) {
+        allCalenders.add(c);
+      }
+    }
+  }
 
   // Add
-  for(let d of data) {
-    if(!d.auto) {
-      continue;
-    }
+  for(let c of allCalenders) {
     let found = false;
     for (let trigger of allTriggers) {
-      if(trigger.getTriggerSourceId() == d.calendarId) {
+      if(trigger.getTriggerSourceId() == c) {
         found = true;
         break;
       }
     }
     if(!found) {
-      Logger.log("Add trigger for: %s", d.calendarId);
+      Logger.log("Add trigger for: %s", c);
       ScriptApp.newTrigger('sync')
-        .forUserCalendar(d.calendarId)
+        .forUserCalendar(c)
         .onEventUpdated()
         .create();
       // Update
@@ -76,11 +82,8 @@ function updateTriggers(data) {
       continue;
     }
     let found = false;
-    for(let d of data) {
-      if(!d.auto) {
-        continue;
-      }
-      if(trigger.getTriggerSourceId() == d.calendarId) {
+    for(let c of allCalenders) {
+      if(trigger.getTriggerSourceId() == c) {
         found = true;
         break;
       }
@@ -107,7 +110,7 @@ function getSyncData() {
     if(row[0]) {
       syncData.push({
         "description": row[0],     // Just for debug, not used.
-        "calendarId": row[1],      // calenderId
+        "calendarId": row[1].split(","),      // calenderId
         "documentId": row[2],      // documentId
         "table": parseInt(row[3]), // Table number in document starting @ 0
         "fromDate": row[4],        // Start Date to extract from calendar
@@ -177,19 +180,43 @@ function updateTable(data,rows) {
 }
 
 /**
+ * Sort function for sorting events
+ */
+function compareEvent(a,b) {
+  if(a.start.date) {
+    if(b.start.date) {
+      return new Date(a.start.date) - new Date(b.start.date);
+    } else {
+      return new Date(a.start.date) - new Date(b.start.dateTime);
+    }
+  } else {
+    if(b.start.date) {
+      return new Date(a.start.dateTime) - new Date(b.start.date);
+    } else {
+      return new Date(a.start.dateTime) - new Date(b.start.dateTime);
+    }
+  }
+  return 0;
+}
+
+/**
  * Fetch events
  */
 function getEvents(data) {
-  //Logger.log(data);
-  var events = Calendar.Events.list(data.calendarId, {
-    timeMin: data.fromDate.toISOString(),
-    timeMax: data.toDate.toISOString(),
-    singleEvents: true,
-    orderBy: 'startTime',
-  });
+  var events = []
+  for(id of data.calendarId) {
+    var e = Calendar.Events.list(id, {
+        timeMin: data.fromDate.toISOString(),
+        timeMax: data.toDate.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime',
+      });
+    events = [...events,...e.items];
+  }
+  events.sort(compareEvent);
   var rows = [];
-  if (events.items && events.items.length > 0) {
-    for (var event of events.items) {
+  if (events && events.length > 0) {
+    for (var event of events) {
       let start;
       let start_time = "";
       let end;
