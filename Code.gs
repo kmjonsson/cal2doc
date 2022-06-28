@@ -21,7 +21,7 @@ function sync(e) {
   let syncData = getSyncData();
   // Sync calenders
   for(let data of syncData) {
-    if(!e || e['calendarId'] && e.calendarId in data.calendarId) {
+    if(!e || e['calendarId'] && data.calendarId.includes(e.calendarId)) {
       let rows = getEvents(data);
       updateTable(data,rows);
     }
@@ -73,8 +73,6 @@ function updateTriggers(data) {
 
   // Remove unused..
   for (let trigger of allTriggers) {
-    //Logger.log(trigger.getEventType());
-    //Logger.log(trigger.getTriggerSource());
     if(trigger.getEventType() != "ON_EVENT_UPDATED") {
       continue;
     }
@@ -88,7 +86,6 @@ function updateTriggers(data) {
         break;
       }
     }
-    //Logger.log(trigger.getTriggerSourceId());
     if(found) {
       continue;
     }
@@ -107,12 +104,12 @@ function getSyncData() {
   var rows = sheet.getDataRange().getValues();
   rows.shift();
   for(let row of rows) {
-    if(row[0]) {
+    if(row[0] && row[1] && row[2] && row[4] && row[5] && row[6] && row[7] && row[8]) {
       syncData.push({
         "description": row[0],     // Just for debug, not used.
         "calendarId": row[1].split(","),      // calenderId
         "documentId": row[2],      // documentId
-        "table": parseInt(row[3]), // Table number in document starting @ 0
+        "table": row[3] ? parseInt(row[3]) : 0, // Table number in document starting @ 0
         "fromDate": row[4],        // Start Date to extract from calendar
         "toDate": row[5],          // End Date to extract from calendar
         "start_time": row[6],      // Default start time of event
