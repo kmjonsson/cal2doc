@@ -257,7 +257,7 @@ function getEvents(data) {
         dateISOStr = iso_start_date + " " + start_time + " - " + end_time;
       }
 
-      rows.push({
+      let rdata = {
         'dateStr': dateStr.replace("  "," "),
         'dateISOStr': dateISOStr.replace("  "," "),
         'title': event.summary,
@@ -265,7 +265,12 @@ function getEvents(data) {
         'longLocation': event.location,
         'description': event.description ? event.description : "",
         'empty': "",
-      });
+      };
+      let i = 0;
+      for(var line of rdata.description.split("\n")) {
+        rdata['description[' + i++ + ']'] = line
+      }
+      rows.push(rdata);
     }
   } else {
     Logger.log('No events found.');

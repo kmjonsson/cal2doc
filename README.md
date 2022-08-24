@@ -62,6 +62,7 @@ Available data:
 - location (First part until ",")
 - longLocation
 - description
+- description[line#]
 - empty ("")
 - skip (Do not edit)
 
