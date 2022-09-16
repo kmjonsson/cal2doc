@@ -266,11 +266,12 @@ function getEvents(data) {
         'title': event.summary,
         'location': (event.location ? event.location : "").split(",")[0],
         'longLocation': event.location,
-        'description': event.description ? event.description : "",
+        'description': event.description ? event.description.replace(/<br>|<\/li>/g, "\n").replace(/<.+?>/g, "").trim() : "",
         'empty': "",
       };
       let i = 0;
       for(var line of rdata.description.split("\n")) {
+        line = line.replace("\n","");
         rdata['description[' + i++ + ']'] = line
       }
       rows.push(rdata);
