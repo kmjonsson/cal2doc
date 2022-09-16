@@ -163,13 +163,16 @@ function updateTable(data,rows) {
       if(key == 'skip') {
         continue;
       }
+      let ctext = t.getCell(i).getText();
+      let ntext = "";
       if(key in row) {
-        let ctext = t.getCell(i).getText();
-        if(ctext != row[key]) {
-          t.getCell(i).setText(row[key]);
-        }
+        ntext = row[key];
       } else {
         Logger.log("Can't update cell: %d on row: %d, no key: %s", i, n, key);
+        Logger.log(row);
+      }
+      if(ctext != ntext) {
+        t.getCell(i).setText(ntext);
       }
     }
     rp++;
